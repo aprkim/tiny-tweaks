@@ -266,13 +266,27 @@
                     <label for="preset-name">Preset Name</label>
                     <input type="text" id="preset-name" placeholder="e.g., My standard lunch salad" autocomplete="on" spellcheck="true" autocorrect="on" autocapitalize="words" required>
                 </div>
+                
+                <!-- Food Items Section -->
                 <div class="form-group">
-                    <label for="preset-calories">Default Calories</label>
+                    <label>Food Items</label>
+                    <div id="preset-food-items" class="preset-food-items">
+                        <p class="empty-state" id="preset-food-empty">No items added yet</p>
+                    </div>
+                    <div class="preset-add-item">
+                        <input type="text" id="preset-item-name" placeholder="Item name" autocomplete="on" spellcheck="true" autocorrect="on">
+                        <input type="number" id="preset-item-calories" placeholder="Calories" min="0">
+                        <button type="button" class="btn-secondary btn-sm" id="add-preset-item-btn">+ Add</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="preset-calories">Total Calories <span id="preset-calories-calculated"></span></label>
                     <input type="number" id="preset-calories" placeholder="0" min="0" required>
                 </div>
                 <div class="form-group">
                     <label for="preset-description">Description (optional)</label>
-                    <textarea id="preset-description" placeholder="Ingredients or notes..." rows="3" autocomplete="on" spellcheck="true" autocorrect="on" autocapitalize="sentences"></textarea>
+                    <textarea id="preset-description" placeholder="Additional notes..." rows="2" autocomplete="on" spellcheck="true" autocorrect="on" autocapitalize="sentences"></textarea>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" id="cancel-preset-btn">Cancel</button>

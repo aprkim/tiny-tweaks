@@ -638,6 +638,81 @@ body {
     flex: 1;
 }
 
+/* Preset Food Items */
+.preset-food-items {
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    min-height: 60px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.preset-food-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: #F8FAFC;
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+
+.preset-food-item:last-child {
+    margin-bottom: 0;
+}
+
+.preset-item-info {
+    flex: 1;
+}
+
+.preset-item-name {
+    font-weight: 500;
+    font-size: 14px;
+    color: #1E293B;
+}
+
+.preset-item-calories {
+    font-size: 13px;
+    color: #64748B;
+}
+
+.preset-item-remove {
+    background: none;
+    border: none;
+    color: #94A3B8;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 8px;
+    transition: color 0.2s;
+}
+
+.preset-item-remove:hover {
+    color: var(--primary);
+}
+
+.preset-add-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.preset-add-item input {
+    flex: 1;
+    min-width: 0;
+}
+
+.preset-add-item input[type="number"] {
+    flex: 0 0 90px;
+}
+
+#preset-calories-calculated {
+    font-size: 13px;
+    color: #64748B;
+    font-weight: normal;
+}
+
 /* ===================================
    Presets Screen
    =================================== */

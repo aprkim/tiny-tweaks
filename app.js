@@ -194,6 +194,8 @@ function initializeEventListeners() {
     });
     
     document.getElementById('add-new-preset-btn').addEventListener('click', () => {
+        presetFoodItems = [];
+        updatePresetFoodItemsDisplay();
         openModal('preset-modal');
     });
     
@@ -204,6 +206,17 @@ function initializeEventListeners() {
     document.getElementById('preset-form').addEventListener('submit', (e) => {
         e.preventDefault();
         addPreset();
+    });
+    
+    // Add preset food item
+    document.getElementById('add-preset-item-btn').addEventListener('click', addPresetFoodItem);
+    
+    // Allow Enter key to add preset item
+    document.getElementById('preset-item-calories').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addPresetFoodItem();
+        }
     });
     
     // Modal close buttons
@@ -471,18 +484,35 @@ function addPreset() {
         return;
     }
     
-    const preset = {
-        id: 'preset-' + Date.now(),
-        name: name,
-        defaultCalories: calories,
-        description: description
-    };
+    if (editingPresetIndex !== null) {
+        // Editing existing preset
+        appData.presets[editingPresetIndex] = {
+            ...appData.presets[editingPresetIndex],
+            name: name,
+            defaultCalories: calories,
+            description: description,
+            items: presetFoodItems.length > 0 ? [...presetFoodItems] : undefined
+        };
+        editingPresetIndex = null;
+    } else {
+        // Adding new preset
+        const preset = {
+            id: 'preset-' + Date.now(),
+            name: name,
+            defaultCalories: calories,
+            description: description,
+            items: presetFoodItems.length > 0 ? [...presetFoodItems] : undefined
+        };
+        appData.presets.push(preset);
+    }
     
-    appData.presets.push(preset);
     saveData();
     
-    // Reset form and close
+    // Reset form and modal title
     document.getElementById('preset-form').reset();
+    presetFoodItems = [];
+    updatePresetFoodItemsDisplay();
+    document.querySelector('#preset-modal .modal-title').textContent = 'Create Preset Meal';
     closeModal('preset-modal');
     loadPresetsScreen();
 }
@@ -493,6 +523,81 @@ function deletePreset(index) {
         saveData();
         loadPresetsScreen();
     }
+}
+
+let editingPresetIndex = null;
+let presetFoodItems = [];
+
+function editPreset(index) {
+    editingPresetIndex = index;
+    const preset = appData.presets[index];
+    
+    document.getElementById('preset-name').value = preset.name;
+    document.getElementById('preset-calories').value = preset.defaultCalories;
+    document.getElementById('preset-description').value = preset.description || '';
+    
+    // Load preset food items if they exist
+    presetFoodItems = preset.items ? [...preset.items] : [];
+    updatePresetFoodItemsDisplay();
+    
+    // Change modal title
+    document.querySelector('#preset-modal .modal-title').textContent = 'Edit Preset Meal';
+    
+    openModal('preset-modal');
+}
+
+function addPresetFoodItem() {
+    const name = document.getElementById('preset-item-name').value.trim();
+    const calories = parseInt(document.getElementById('preset-item-calories').value);
+    
+    if (!name || isNaN(calories)) {
+        alert('Please enter item name and calories');
+        return;
+    }
+    
+    presetFoodItems.push({ name, calories });
+    
+    // Clear inputs
+    document.getElementById('preset-item-name').value = '';
+    document.getElementById('preset-item-calories').value = '';
+    document.getElementById('preset-item-name').focus();
+    
+    updatePresetFoodItemsDisplay();
+}
+
+function removePresetFoodItem(index) {
+    presetFoodItems.splice(index, 1);
+    updatePresetFoodItemsDisplay();
+}
+
+function updatePresetFoodItemsDisplay() {
+    const container = document.getElementById('preset-food-items');
+    const emptyState = document.getElementById('preset-food-empty');
+    
+    if (presetFoodItems.length === 0) {
+        container.innerHTML = '<p class="empty-state" id="preset-food-empty">No items added yet</p>';
+        document.getElementById('preset-calories').value = '';
+        document.getElementById('preset-calories-calculated').textContent = '';
+        return;
+    }
+    
+    // Calculate total calories
+    const totalCalories = presetFoodItems.reduce((sum, item) => sum + item.calories, 0);
+    
+    // Update display
+    container.innerHTML = presetFoodItems.map((item, index) => `
+        <div class="preset-food-item">
+            <div class="preset-item-info">
+                <div class="preset-item-name">${item.name}</div>
+                <div class="preset-item-calories">${item.calories} kcal</div>
+            </div>
+            <button type="button" class="preset-item-remove" onclick="removePresetFoodItem(${index})">&times;</button>
+        </div>
+    `).join('');
+    
+    // Auto-fill total calories
+    document.getElementById('preset-calories').value = totalCalories;
+    document.getElementById('preset-calories-calculated').textContent = `(auto-calculated from ${presetFoodItems.length} item${presetFoodItems.length > 1 ? 's' : ''})`;
 }
 
 function loadPresetsScreen() {
@@ -513,6 +618,7 @@ function loadPresetsScreen() {
                 <div class="preset-calories">${preset.defaultCalories} kcal</div>
             </div>
             <div class="preset-actions">
+                <button class="btn-secondary btn-sm" onclick="editPreset(${index})">Edit</button>
                 <button class="btn-secondary btn-sm" onclick="deletePreset(${index})">Delete</button>
             </div>
         </div>
