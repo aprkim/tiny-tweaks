@@ -803,11 +803,11 @@ body {
 }
 
 .preset-search-row input[type="text"] {
-    flex: 2;
+    flex: 1.5;
 }
 
 .preset-search-row input[type="number"] {
-    flex: 0 0 100px;
+    flex: 0 0 120px;
     background: #F8FAFC;
 }
 
