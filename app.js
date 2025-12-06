@@ -635,22 +635,21 @@ async function searchPresetFood() {
     searchBtn.disabled = true;
     
     try {
-        const response = await fetch(`https://api.calorieninjas.com/v1/nutrition?query=${encodeURIComponent(name)}`, {
-            headers: {
-                'X-Api-Key': 'DEMO_KEY'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error('API request failed');
-        }
-        
+        const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(name)}&search_simple=1&action=process&json=1&page_size=1`);
         const data = await response.json();
         
-        if (data.items && data.items.length > 0) {
-            const item = data.items[0];
-            const calories = Math.round(item.calories);
-            caloriesInput.value = calories;
+        if (data.products && data.products.length > 0) {
+            const product = data.products[0];
+            // Energy is in kJ per 100g, convert to kcal
+            const energyKcal = product.nutriments['energy-kcal_100g'] || product.nutriments['energy-kcal'];
+            
+            if (energyKcal) {
+                const calories = Math.round(energyKcal);
+                caloriesInput.value = calories;
+            } else {
+                await customAlert('Could not find calorie information for this food');
+                caloriesInput.value = '';
+            }
         } else {
             await customAlert('Food not found. Please try a different name.');
             caloriesInput.value = '';
@@ -737,23 +736,21 @@ async function lookupFoodCalories() {
     lookupBtn.disabled = true;
     
     try {
-        const response = await fetch(`https://api.calorieninjas.com/v1/nutrition?query=${encodeURIComponent(name)}`, {
-            headers: {
-                'X-Api-Key': 'DEMO_KEY'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error('API request failed');
-        }
-        
+        const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(name)}&search_simple=1&action=process&json=1&page_size=1`);
         const data = await response.json();
         
-        if (data.items && data.items.length > 0) {
-            const item = data.items[0];
-            const calories = Math.round(item.calories);
-            caloriesInput.value = calories;
-            caloriesInput.focus();
+        if (data.products && data.products.length > 0) {
+            const product = data.products[0];
+            // Energy is in kJ per 100g, convert to kcal
+            const energyKcal = product.nutriments['energy-kcal_100g'] || product.nutriments['energy-kcal'];
+            
+            if (energyKcal) {
+                const calories = Math.round(energyKcal);
+                caloriesInput.value = calories;
+                caloriesInput.focus();
+            } else {
+                await customAlert('Could not find calorie information for this food');
+            }
         } else {
             await customAlert('Food not found. Please try a different name or enter calories manually.');
         }
