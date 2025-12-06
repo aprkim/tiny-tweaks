@@ -389,7 +389,7 @@ function addFood() {
     const saveAsPreset = document.getElementById('save-as-preset').checked;
     
     if (!name || isNaN(calories)) {
-        alert('Please fill in food name and calories');
+        customAlert('Please fill in food name and calories');
         return;
     }
     
@@ -442,8 +442,8 @@ function addExercise() {
     const duration = parseInt(document.getElementById('exercise-duration').value);
     const calories = parseInt(document.getElementById('exercise-calories').value) || 0;
     
-    if (!name || isNaN(duration)) {
-        alert('Please fill in exercise name and duration');
+    if (!name || isNaN(duration) || duration <= 0) {
+        customAlert('Please enter exercise name and duration');
         return;
     }
     
@@ -483,7 +483,7 @@ function addPreset() {
     const description = document.getElementById('preset-description').value.trim();
     
     if (!name || isNaN(calories)) {
-        alert('Please fill in preset name and calories');
+        customAlert('Please fill in preset name and calories');
         return;
     }
     
@@ -520,8 +520,9 @@ function addPreset() {
     loadPresetsScreen();
 }
 
-function deletePreset(index) {
-    if (confirm('Delete this preset?')) {
+async function deletePreset(index) {
+    const confirmed = await customConfirm('Delete this preset?');
+    if (confirmed) {
         appData.presets.splice(index, 1);
         saveData();
         loadPresetsScreen();
@@ -555,7 +556,7 @@ async function lookupCalories() {
     const lookupBtn = document.getElementById('lookup-calories-btn');
     
     if (!name) {
-        alert('Please enter a food name first');
+        await customAlert('Please enter a food name first');
         return;
     }
     
@@ -580,14 +581,14 @@ async function lookupCalories() {
                 caloriesInput.value = calories;
                 caloriesInput.focus();
             } else {
-                alert('Could not find calorie information for this food');
+                await customAlert('Could not find calorie information for this food');
             }
         } else {
-            alert('Food not found. Please try a different name or enter calories manually.');
+            await customAlert('Food not found. Please try a different name or enter calories manually.');
         }
     } catch (error) {
         console.error('Calorie lookup error:', error);
-        alert('Unable to look up calories. Please enter manually.');
+        await customAlert('Unable to look up calories. Please enter manually.');
     } finally {
         // Restore button
         lookupBtn.innerHTML = '<i class="fas fa-search"></i>';
@@ -600,7 +601,7 @@ function addPresetFoodItem() {
     const calories = parseInt(document.getElementById('preset-item-calories').value);
     
     if (!name || isNaN(calories)) {
-        alert('Please enter item name and calories');
+        customAlert('Please enter item name and calories');
         return;
     }
     
@@ -828,38 +829,37 @@ function exportData() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     
-    alert('Data exported successfully! ✓');
+    customAlert('Data exported successfully! ✓');
 }
 
-function importData(event) {
+async function importData(event) {
     const file = event.target.files[0];
     if (!file) return;
     
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
         try {
             const imported = JSON.parse(e.target.result);
             
             // Validate data structure
             if (!imported.days || !imported.presets) {
-                alert('Invalid data file format');
+                await customAlert('Invalid data file format');
                 return;
             }
             
             // Confirm overwrite
             if (appData.days.length > 0 || appData.presets.length > 0) {
-                if (!confirm('This will replace your current data. Continue?')) {
-                    return;
-                }
+                const confirmed = await customConfirm('This will replace your current data. Continue?');
+                if (!confirmed) return;
             }
             
             appData = imported;
             saveData();
             loadTodayScreen();
             
-            alert('Data imported successfully! ✓');
+            await customAlert('Data imported successfully! ✓');
         } catch (error) {
-            alert('Error importing data. Please check the file.');
+            await customAlert('Error importing data. Please check the file.');
             console.error('Import error:', error);
         }
     };

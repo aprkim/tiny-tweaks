@@ -729,6 +729,48 @@ body {
     font-weight: normal;
 }
 
+/* Custom Dialog Styles */
+.custom-dialog .dialog-content {
+    max-width: 400px;
+    padding: 0;
+}
+
+.dialog-body {
+    padding: var(--space-lg);
+    text-align: center;
+}
+
+.dialog-icon {
+    font-size: 48px;
+    margin-bottom: var(--space-md);
+}
+
+.dialog-icon-info {
+    color: #3B82F6;
+}
+
+.dialog-icon-warning {
+    color: #F59E0B;
+}
+
+.dialog-message {
+    font-size: 16px;
+    color: var(--text-dark);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.dialog-actions {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg) var(--space-lg);
+    border-top: 1px solid var(--border-gray);
+}
+
+.dialog-actions button {
+    flex: 1;
+}
+
 /* ===================================
    Presets Screen
    =================================== */
