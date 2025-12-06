@@ -210,36 +210,18 @@ function initializeEventListeners() {
     
     document.getElementById('add-new-preset-btn').addEventListener('click', () => {
         document.getElementById('preset-form').reset();
-        presetFoodItems = [];
-        updatePresetFoodItemsDisplay();
         document.querySelector('#preset-modal .modal-title').textContent = 'Create Preset Meal';
         openModal('preset-modal');
     });
     
     document.getElementById('cancel-preset-btn').addEventListener('click', () => {
         document.getElementById('preset-form').reset();
-        presetFoodItems = [];
-        updatePresetFoodItemsDisplay();
         closeModal('preset-modal');
     });
     
     document.getElementById('preset-form').addEventListener('submit', (e) => {
         e.preventDefault();
         addPreset();
-    });
-    
-    // Add preset food item
-    document.getElementById('add-preset-item-btn').addEventListener('click', addPresetFoodItem);
-    
-    // Lookup calories button
-    document.getElementById('lookup-calories-btn').addEventListener('click', lookupCalories);
-    
-    // Allow Enter key to add preset item
-    document.getElementById('preset-item-calories').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            addPresetFoodItem();
-        }
     });
     
     // Modal close buttons
@@ -513,8 +495,7 @@ function addPreset() {
             ...appData.presets[editingPresetIndex],
             name: name,
             defaultCalories: calories,
-            description: description,
-            items: presetFoodItems.length > 0 ? [...presetFoodItems] : undefined
+            description: description
         };
         editingPresetIndex = null;
     } else {
@@ -523,8 +504,7 @@ function addPreset() {
             id: 'preset-' + Date.now(),
             name: name,
             defaultCalories: calories,
-            description: description,
-            items: presetFoodItems.length > 0 ? [...presetFoodItems] : undefined
+            description: description
         };
         appData.presets.push(preset);
     }
@@ -533,8 +513,6 @@ function addPreset() {
     
     // Reset form and modal title
     document.getElementById('preset-form').reset();
-    presetFoodItems = [];
-    updatePresetFoodItemsDisplay();
     document.querySelector('#preset-modal .modal-title').textContent = 'Create Preset Meal';
     closeModal('preset-modal');
     loadPresetsScreen();
@@ -550,7 +528,6 @@ async function deletePreset(index) {
 }
 
 let editingPresetIndex = null;
-let presetFoodItems = [];
 
 function editPreset(index) {
     editingPresetIndex = index;
@@ -559,10 +536,6 @@ function editPreset(index) {
     document.getElementById('preset-name').value = preset.name;
     document.getElementById('preset-calories').value = preset.defaultCalories;
     document.getElementById('preset-description').value = preset.description || '';
-    
-    // Load preset food items if they exist
-    presetFoodItems = preset.items ? [...preset.items] : [];
-    updatePresetFoodItemsDisplay();
     
     // Change modal title
     document.querySelector('#preset-modal .modal-title').textContent = 'Edit Preset Meal';
@@ -611,106 +584,6 @@ async function lookupFoodCalories() {
         lookupBtn.innerHTML = '<i class="fas fa-search"></i>';
         lookupBtn.disabled = false;
     }
-}
-
-async function lookupCalories() {
-    const name = document.getElementById('preset-item-name').value.trim();
-    const caloriesInput = document.getElementById('preset-item-calories');
-    const lookupBtn = document.getElementById('lookup-calories-btn');
-    
-    if (!name) {
-        await customAlert('Please enter a food name first');
-        return;
-    }
-    
-    // Show loading state
-    lookupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    lookupBtn.disabled = true;
-    
-    try {
-        // Using USDA FoodData Central API (no API key required for basic search)
-        const response = await fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?query=${encodeURIComponent(name)}&pageSize=1&api_key=DEMO_KEY`);
-        const data = await response.json();
-        
-        if (data.foods && data.foods.length > 0) {
-            const food = data.foods[0];
-            // Find calories per 100g
-            const calorieNutrient = food.foodNutrients.find(n => 
-                n.nutrientName === 'Energy' && n.unitName === 'KCAL'
-            );
-            
-            if (calorieNutrient) {
-                const calories = Math.round(calorieNutrient.value);
-                caloriesInput.value = calories;
-                caloriesInput.focus();
-            } else {
-                await customAlert('Could not find calorie information for this food');
-            }
-        } else {
-            await customAlert('Food not found. Please try a different name or enter calories manually.');
-        }
-    } catch (error) {
-        console.error('Calorie lookup error:', error);
-        await customAlert('Unable to look up calories. Please enter manually.');
-    } finally {
-        // Restore button
-        lookupBtn.innerHTML = '<i class="fas fa-search"></i>';
-        lookupBtn.disabled = false;
-    }
-}
-
-function addPresetFoodItem() {
-    const name = document.getElementById('preset-item-name').value.trim();
-    const calories = parseInt(document.getElementById('preset-item-calories').value);
-    
-    if (!name || isNaN(calories)) {
-        customAlert('Please enter item name and calories');
-        return;
-    }
-    
-    presetFoodItems.push({ name, calories });
-    
-    // Clear inputs
-    document.getElementById('preset-item-name').value = '';
-    document.getElementById('preset-item-calories').value = '';
-    document.getElementById('preset-item-name').focus();
-    
-    updatePresetFoodItemsDisplay();
-}
-
-function removePresetFoodItem(index) {
-    presetFoodItems.splice(index, 1);
-    updatePresetFoodItemsDisplay();
-}
-
-function updatePresetFoodItemsDisplay() {
-    const container = document.getElementById('preset-food-items');
-    const emptyState = document.getElementById('preset-food-empty');
-    
-    if (presetFoodItems.length === 0) {
-        container.innerHTML = '<p class="empty-state" id="preset-food-empty">No items added yet</p>';
-        document.getElementById('preset-calories').value = '';
-        document.getElementById('preset-calories-calculated').textContent = '';
-        return;
-    }
-    
-    // Calculate total calories
-    const totalCalories = presetFoodItems.reduce((sum, item) => sum + item.calories, 0);
-    
-    // Update display
-    container.innerHTML = presetFoodItems.map((item, index) => `
-        <div class="preset-food-item">
-            <div class="preset-item-info">
-                <div class="preset-item-name">${item.name}</div>
-                <div class="preset-item-calories">${item.calories} kcal</div>
-            </div>
-            <button type="button" class="preset-item-remove" onclick="removePresetFoodItem(${index})">&times;</button>
-        </div>
-    `).join('');
-    
-    // Auto-fill total calories
-    document.getElementById('preset-calories').value = totalCalories;
-    document.getElementById('preset-calories-calculated').textContent = `(auto-calculated from ${presetFoodItems.length} item${presetFoodItems.length > 1 ? 's' : ''})`;
 }
 
 function loadPresetsScreen() {
