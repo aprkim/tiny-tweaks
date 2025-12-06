@@ -260,18 +260,34 @@ function initializeEventListeners() {
     
     document.getElementById('add-new-preset-btn').addEventListener('click', () => {
         document.getElementById('preset-form').reset();
+        presetItems = [];
+        updatePresetItemsList();
         document.querySelector('#preset-modal .modal-title').textContent = 'Create Preset Meal';
         openModal('preset-modal');
     });
     
     document.getElementById('cancel-preset-btn').addEventListener('click', () => {
         document.getElementById('preset-form').reset();
+        presetItems = [];
+        updatePresetItemsList();
         closeModal('preset-modal');
     });
     
     document.getElementById('preset-form').addEventListener('submit', (e) => {
         e.preventDefault();
         addPreset();
+    });
+    
+    // Preset search and add
+    document.getElementById('preset-search-btn').addEventListener('click', searchPresetFood);
+    document.getElementById('preset-add-item-btn').addEventListener('click', addPresetItem);
+    
+    // Allow Enter key to search
+    document.getElementById('preset-search-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchPresetFood();
+        }
     });
     
     // Modal close buttons
@@ -531,11 +547,16 @@ function deleteExercise(index) {
 
 function addPreset() {
     const name = document.getElementById('preset-name').value.trim();
-    const calories = parseInt(document.getElementById('preset-calories').value);
+    const calories = parseInt(document.getElementById('preset-total-calories').value);
     const description = document.getElementById('preset-description').value.trim();
     
-    if (!name || isNaN(calories)) {
-        customAlert('Please fill in preset name and calories');
+    if (!name) {
+        customAlert('Please enter a preset name');
+        return;
+    }
+    
+    if (isNaN(calories) || calories <= 0) {
+        customAlert('Please add at least one food item');
         return;
     }
     
@@ -545,7 +566,8 @@ function addPreset() {
             ...appData.presets[editingPresetIndex],
             name: name,
             defaultCalories: calories,
-            description: description
+            description: description,
+            items: [...presetItems]
         };
         editingPresetIndex = null;
     } else {
@@ -554,7 +576,8 @@ function addPreset() {
             id: 'preset-' + Date.now(),
             name: name,
             defaultCalories: calories,
-            description: description
+            description: description,
+            items: [...presetItems]
         };
         appData.presets.push(preset);
     }
@@ -563,6 +586,8 @@ function addPreset() {
     
     // Reset form and modal title
     document.getElementById('preset-form').reset();
+    presetItems = [];
+    updatePresetItemsList();
     document.querySelector('#preset-modal .modal-title').textContent = 'Create Preset Meal';
     closeModal('preset-modal');
     loadPresetsScreen();
@@ -575,19 +600,126 @@ async function deletePreset(index) {
 }
 
 let editingPresetIndex = null;
+let presetItems = [];
 
 function editPreset(index) {
     editingPresetIndex = index;
     const preset = appData.presets[index];
     
     document.getElementById('preset-name').value = preset.name;
-    document.getElementById('preset-calories').value = preset.defaultCalories;
     document.getElementById('preset-description').value = preset.description || '';
+    
+    // Load preset items if they exist
+    presetItems = preset.items ? [...preset.items] : [];
+    updatePresetItemsList();
     
     // Change modal title
     document.querySelector('#preset-modal .modal-title').textContent = 'Edit Preset Meal';
     
     openModal('preset-modal');
+}
+
+async function searchPresetFood() {
+    const searchInput = document.getElementById('preset-search-input');
+    const caloriesInput = document.getElementById('preset-search-calories');
+    const searchBtn = document.getElementById('preset-search-btn');
+    const name = searchInput.value.trim();
+    
+    if (!name) {
+        await customAlert('Please enter a food name to search');
+        return;
+    }
+    
+    // Show loading state
+    searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    searchBtn.disabled = true;
+    
+    try {
+        const response = await fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?query=${encodeURIComponent(name)}&pageSize=1&api_key=DEMO_KEY`);
+        const data = await response.json();
+        
+        if (data.foods && data.foods.length > 0) {
+            const food = data.foods[0];
+            const calorieNutrient = food.foodNutrients.find(n => 
+                n.nutrientName === 'Energy' && n.unitName === 'KCAL'
+            );
+            
+            if (calorieNutrient) {
+                const calories = Math.round(calorieNutrient.value);
+                caloriesInput.value = calories;
+            } else {
+                await customAlert('Could not find calorie information for this food');
+                caloriesInput.value = '';
+            }
+        } else {
+            await customAlert('Food not found. Please try a different name.');
+            caloriesInput.value = '';
+        }
+    } catch (error) {
+        console.error('Search error:', error);
+        await customAlert('Unable to search. Please try again.');
+        caloriesInput.value = '';
+    } finally {
+        searchBtn.innerHTML = '<i class="fas fa-search"></i>';
+        searchBtn.disabled = false;
+    }
+}
+
+function addPresetItem() {
+    const name = document.getElementById('preset-search-input').value.trim();
+    const calories = parseInt(document.getElementById('preset-search-calories').value);
+    
+    if (!name) {
+        customAlert('Please enter a food name');
+        return;
+    }
+    
+    if (isNaN(calories) || calories <= 0) {
+        customAlert('Please search for calories first or enter a valid amount');
+        return;
+    }
+    
+    presetItems.push({ name, calories });
+    
+    // Clear inputs
+    document.getElementById('preset-search-input').value = '';
+    document.getElementById('preset-search-calories').value = '';
+    document.getElementById('preset-search-input').focus();
+    
+    updatePresetItemsList();
+}
+
+function removePresetItem(index) {
+    presetItems.splice(index, 1);
+    updatePresetItemsList();
+}
+
+function updatePresetItemsList() {
+    const container = document.getElementById('preset-items-list');
+    const totalInput = document.getElementById('preset-total-calories');
+    
+    if (presetItems.length === 0) {
+        container.innerHTML = '<p class="empty-state">No items added yet</p>';
+        totalInput.value = 0;
+        return;
+    }
+    
+    // Calculate total
+    const total = presetItems.reduce((sum, item) => sum + item.calories, 0);
+    
+    // Update display
+    container.innerHTML = presetItems.map((item, index) => `
+        <div class="preset-list-item">
+            <div class="preset-list-item-info">
+                <div class="preset-list-item-name">${item.name}</div>
+            </div>
+            <span class="preset-list-item-calories">${item.calories} kcal</span>
+            <button type="button" class="preset-list-item-remove" onclick="removePresetItem(${index})">&times;</button>
+        </div>
+    `).join('');
+    
+    // Update total
+    totalInput.value = total;
 }
 
 async function lookupFoodCalories() {

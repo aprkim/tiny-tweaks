@@ -270,10 +270,30 @@
                     <input type="text" id="preset-name" placeholder="e.g., My standard lunch salad" autocomplete="on" spellcheck="true" autocorrect="on" autocapitalize="words" required>
                 </div>
                 
+                <!-- Food Item Search and Add -->
                 <div class="form-group">
-                    <label for="preset-calories">Calories</label>
-                    <input type="number" id="preset-calories" placeholder="0" min="0" required>
+                    <label>Add Food Items</label>
+                    <div class="preset-search-row">
+                        <input type="text" id="preset-search-input" placeholder="Search food..." autocomplete="on" spellcheck="true" autocorrect="on">
+                        <button type="button" class="btn-secondary btn-sm" id="preset-search-btn" title="Search"><i class="fas fa-search"></i></button>
+                        <input type="number" id="preset-search-calories" placeholder="Calories" min="0" readonly>
+                        <button type="button" class="btn-secondary btn-sm" id="preset-add-item-btn">+ Add</button>
+                    </div>
                 </div>
+                
+                <!-- Added Items List -->
+                <div class="form-group">
+                    <div id="preset-items-list" class="preset-items-list">
+                        <p class="empty-state">No items added yet</p>
+                    </div>
+                </div>
+                
+                <!-- Total Calories -->
+                <div class="form-group">
+                    <label for="preset-total-calories">Total Calories</label>
+                    <input type="number" id="preset-total-calories" placeholder="0" min="0" readonly>
+                </div>
+                
                 <div class="form-group">
                     <label for="preset-description">Description (optional)</label>
                     <textarea id="preset-description" placeholder="Additional notes..." rows="2" autocomplete="on" spellcheck="true" autocorrect="on" autocapitalize="sentences"></textarea>
