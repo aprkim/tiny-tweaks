@@ -1,8 +1,8 @@
-# 🎯 Tiny Deficit
+# 🎯 Tiny Tweaks
 
-**Small deficits. Big wins.**
+**Smart changes. Real progress.**
 
-A mobile-friendly web app to help you lose weight by logging daily weight, food intake, and exercise—all with smart unit conversion and beautiful data visualization.
+A mobile-friendly web app to help you make smart changes by logging daily weight, food intake, and exercise—all with smart unit conversion and beautiful data visualization.
 
 ---
 
@@ -43,7 +43,7 @@ A mobile-friendly web app to help you lose weight by logging daily weight, food 
 
 ## 🎨 Design
 
-Built with the **Tiny Deficit** brand identity:
+Built with the **Tiny Tweaks** brand identity:
 - **Primary Color**: Raspberry Red `#BF3143`
 - **Typography**: Inter (clean, modern, mobile-friendly)
 - **Mobile-First**: Responsive design optimized for touch
@@ -151,7 +151,7 @@ Some ideas for v2:
 
 ## 📄 License
 
-Free to use for personal projects. Built with ❤️ by the Tiny Deficit team.
+Free to use for personal projects. Built with ❤️ by the Tiny Tweaks team.
 
 ---
 
@@ -165,4 +165,4 @@ Free to use for personal projects. Built with ❤️ by the Tiny Deficit team.
 
 **Ready to start your journey? Open index.html and let's go! 🚀**
 
-*Small deficits. Big wins.*
+*Smart changes. Real progress.*

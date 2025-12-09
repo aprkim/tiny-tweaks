@@ -1,5 +1,5 @@
 // ===================================
-// Tiny Deficit - App Logic
+// Tiny Tweaks - App Logic
 // ===================================
 
 // Helper to get local date string (YYYY-MM-DD)
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ===================================
 
 function loadData() {
-    const stored = localStorage.getItem('tiny-deficit-data');
+    const stored = localStorage.getItem('tiny-tweaks-data');
     if (stored) {
         try {
             appData = JSON.parse(stored);
@@ -98,7 +98,7 @@ function loadData() {
 }
 
 function saveData() {
-    localStorage.setItem('tiny-deficit-data', JSON.stringify(appData));
+    localStorage.setItem('tiny-tweaks-data', JSON.stringify(appData));
 }
 
 function getDayData(date) {
@@ -1035,7 +1035,7 @@ function exportData() {
     const link = document.createElement('a');
     link.href = url;
     const date = getLocalDateString();
-    link.download = `tiny-deficit-backup-${date}.json`;
+    link.download = `tiny-tweaks-backup-${date}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
