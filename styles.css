@@ -975,7 +975,7 @@ body {
 
 .preset-select-footer {
     padding: var(--space-md);
-    padding-top: 0;
+    padding-top: var(--space-lg);
     display: flex;
     justify-content: center;
 }
