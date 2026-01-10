@@ -1199,12 +1199,12 @@ body {
 }
 
 .preset-tab:hover {
-    background: var(--primary-light);
-    color: var(--primary);
+    background: #F3F4F6;
+    color: var(--text-dark);
 }
 
 .preset-tab.active {
-    background: var(--primary);
+    background: #4B5563;
     color: white;
 }
 
