@@ -1385,12 +1385,9 @@ function resetBrowser() {
 }
 
 async function confirmDeleteAllData() {
-    const confirmed = await customConfirm('⚠️ This will permanently delete ALL your data. This action cannot be undone. Are you absolutely sure?');
+    const confirmed = await customConfirm('Delete all data permanently? This action cannot be undone.');
     if (confirmed) {
-        const doubleConfirmed = await customConfirm('Final confirmation: Delete everything?');
-        if (doubleConfirmed) {
-            deleteAllData();
-        }
+        deleteAllData();
     }
 }
 
@@ -1495,6 +1492,7 @@ async function copySyncCode() {
 function submitSyncCode() {
     const input = document.getElementById('enterSyncCodeInput');
     const code = input.value.trim().toLowerCase();
+    const linkBtn = document.querySelector('.sync-link-btn');
 
     if (!code) {
         customAlert('Please enter a sync code');
@@ -1520,7 +1518,12 @@ function submitSyncCode() {
         setupFirebaseSync();
     }
 
-    customAlert('Sync code set! Your data will now sync across devices.');
+    // Change button text to "Linked"
+    if (linkBtn) {
+        linkBtn.textContent = 'Linked';
+        linkBtn.disabled = true;
+    }
+
     input.value = '';
 }
 
